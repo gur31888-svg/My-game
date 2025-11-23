@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>עכשיו תורך 2.0</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* צבעים עמוקים ויוקרתיים */
+            --hot: linear-gradient(135deg, #8B0000 0%, #CC0000 100%); /* אדום יין לבוהק */
+            --deep: linear-gradient(135deg, #000080 0%, #1A1A5C 100%); /* כחול כהה עמוק */
+            --fun: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%); /* זהב נוצץ */
+            --romantic: linear-gradient(135deg, #4B0082 0%, #8A2BE2 100%); /* סגול מלכותי */
+            --mixed: linear-gradient(135deg, #333333 0%, #555555 100%); /* אפור פחם כהה */
+            --bg-overall: linear-gradient(135deg, #1C1C1C 0%, #0A0A0A 100%); /* רקע כללי כהה מאוד */
+            --text-light: #ffffff;
+            --text-dark: #000000;
+            --card-border-radius: 20px;
+        }
+
+        body {
+            background: var(--bg-overall);
+            font-family: 'Heebo', sans-serif;
+            color: var(--text-light);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* כותרות ראשיות */
+        h1 {
+            font-family: 'Playfair Display', serif; /* פונט אלגנטי יותר לכותרת */
+            font-weight: 900;
+            font-size: 3rem; /* גודל גדול יותר */
+            margin-bottom: 40px;
+            letter-spacing: 0px; /* רווח אותיות רגיל */
+            text-align: center;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.4); /* צל עדין לטקסט */
+        }
+
+        /* מסך פתיחה / תפריט */
+        #menu-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            gap: 18px; /* רווח גדול יותר בין הכפתורים */
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            opacity: 1;
+            transform: scale(1);
+        }
+        #menu-screen.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+            position: absolute;
+        }
+
+        .category-btn {
+            width: 100%;
+            max-width: 350px;
+            padding: 22px 30px;
+            border: none;
+            border-radius: var(--card-border-radius);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-size: 200% auto;
+            background-position: right center;
+        }
+
+        .category-btn:hover {
+            background-position: left center;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.7);
+            transform: translateY(-3px);
+        }
+        .category-btn:active {
+            transform: scale(0.96) translateY(0);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        /* צבעים עם גרדיאנטים */
+        .btn-deep { background-image: var(--deep); }
+        .btn-fun { background-image: var(--fun); color: var(--text-dark); } 
+        .btn-romantic { background-image: var(--romantic); }
+        .btn-hot { background-image: var(--hot); }
+        .btn-mixed { background-image: var(--mixed); }
+
+        .category-btn span:first-child {
+            flex-grow: 1;
+            text-align: center;
+        }
+        .category-btn span:last-child {
+            font-size: 1.8rem;
+            margin-right: 15px;
+            opacity: 0.9;
+        }
+
+
+        /* מסך הקלף */
+        #card-screen {
+            display: none;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInCard 0.6s ease-out forwards;
+            background: var(--bg-overall);
+        }
+        #card-screen.visible {
+            display: flex;
+        }
+
+        #current-card-wrapper {
+            background: #222;
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+            width: 90%;
+            max-width: 400px;
+            min-height: 450px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 25px;
+            position: relative;
+            transition: background-image 0.4s ease-out;
+            animation: cardPop 0.4s ease-out;
+        }
+
+        #card-category-title {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        #card-content {
+            font-family: 'Heebo', sans-serif;
+            font-size: 2.1rem;
+            font-weight: 700;
+            line-height: 1.4;
+            max-width: 95%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            transition: opacity 0.3s ease;
+        }
+
+        .action-bar {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: var(--text-light);
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        .action-btn:active {
+            transform: scale(0.96);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* התאמות למצב טקסט כהה (כפתור 'כיף') */
+        .dark-text-mode #current-card-wrapper {
+             color: var(--text-dark);
+        }
+        .dark-text-mode #card-category-title {
+            color: var(--text-dark);
+            text-shadow: none;
+        }
+        .dark-text-mode #card-content {
+            color: var(--text-dark);
+            text-shadow: none;
+        }
+        .dark-text-mode .action-btn {
+             border-color: rgba(0,0,0,0.4);
+             color: var(--text-dark);
+             background: rgba(0,0,0,0.15);
+        }
+        .dark-text-mode .action-btn:hover {
+            background: rgba(0,0,0,0.25);
+        }
+        .dark-text-mode .action-btn:active {
+            background: rgba(0,0,0,0.1);
+        }
+
+        /* אנימציות */
+        @keyframes fadeInCard {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes cardPop {
+            from { transform: scale(0.95); opacity: 0.7; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        /* אנימציית הטקסט של הקלף הבא */
+        @keyframes nextCardAnimation {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="menu-screen">
+        <h1>עכשיו תורך 2.0</h1>
+        <button class="category-btn btn-mixed" onclick="startGame('mixed')">
+            <span>מעורבב / הפתעה</span> <span>💫</span>
+        </button>
+        <button class="category-btn btn-deep" onclick="startGame('deep')">
+            <span>עמוק</span> <span>🌊</span>
+        </button>
+        <button class="category-btn btn-fun" onclick="startGame('fun')">
+            <span>כיף / שטות</span> <span>🤪</span>
+        </button>
+        <button class="category-btn btn-romantic" onclick="startGame('romantic')">
+            <span>רומנטי</span> <span>❤️</span>
+        </button>
+        <button class="category-btn btn-hot" onclick="startGame('hot')">
+            <span>חם 🔥</span> <span>🌶️</span>
+        </button>
+    </div>
+
+    <div id="card-screen">
+        <div id="current-card-wrapper">
+            <div id="card-category-title">קטגוריה</div>
+            <div id="card-content">השאלה תופיע כאן</div>
+        </div>
+        <div class="action-bar">
+            <button class="action-btn" onclick="showMenu()">חזרה לתפריט</button>
+            <button class="action-btn" onclick="nextCard()">הבא</button>
+        </div>
+    </div>
+
+    <script>
+        // המאגר המלא של הקלפים (100 שאלות ומשימות)
+        const decks = {
+            deep: [
+                "מתי לאחרונה הרגשת שאני ממש 'רואה' אותך ואת מה שעובר עליך?",
+                "אם היית יכול/ה לשנות החלטה אחת שלקחנו כזוג בעבר, איזו החלטה זו הייתה?",
+                "מה הדבר שאת/ה הכי מעריכ/ה בי בהורות שלנו (או בהתנהלות המשותפת בבית)?",
+                "איזה חלום ישן שלך הזנחת, ואיך אני יכול/ה לעזור לך להחזיר אותו לחיים?",
+                "מתי הרגשת הכי בודד/ה בתוך הקשר שלנו בשנה האחרונה?",
+                "מה התכונה שלי שפעם עצבנה אותך והיום את/ה דווקא אוהב/ת?",
+                "מה הפחד הכי גדול שלך לגבי ההזדקנות שלנו יחד?",
+                "אם היית צריך/ה לתאר את הנישואים שלנו במילה אחת כרגע, מה היא הייתה?",
+                "מה הדבר שאת/ה הכי מתגעגע/ת אליו מהתקופה שרק הכרנו?",
+                "איזה סוד קטן או מחשבה שמרת לעצמך לאחרונה ולא שיתפת אותי? עכשיו הזמן.",
+                "על מה את/ה חושב/ת שאנחנו צריכים לסלוח אחד לשנייה כדי להתקדם?",
+                "מתי הרגשת הכי גאה בי לאחרונה?",
+                "מה הדבר שאני עושה שגורם לך להרגיש הכי בטוח/ה בעולם?",
+                "איזו מסורת היית רוצה שנכניס לחיים שלנו החל מעכשיו?",
+                "מה למדת על אהבה מההורים שלך, שאת/ה מנסה לתקן או לחקות אצלנו?",
+                "איפה את/ה רואה אותנו בעוד 10 שנים מהיום? תאר/י לי תמונה.",
+                "מה הדבר שהכי קשה לך לבקש ממני, ולמה?",
+                "אם היית יכול/ה לקבל תשובה כנה לחלוטין על שאלה אחת שמפחידה אותך לשאול – מה היא הייתה?",
+                "מה גורם לך להרגיש סקסי/ת ונחשק/ת בעיניי בימים אלו?",
+                "על איזה ויתור שעשית למעני את/ה עדיין חושב/ת לפעמים?",
+                "מה הדבר שהכי היית רוצה שאני אבין לגבי העבודה/הקריירה שלך?",
+                "מתי צחקנו יחד בפעם האחרונה עד שכאבה הבטן? בוא/י ננסה לשחזר את הרגע.",
+                "מהי הדרך האהובה עליך להתפייס אחרי ריב?",
+                "איך השתניתי לטובה מאז החתונה לדעתך?",
+                "תסתכל/י לי בעיניים ותגיד/י לי דבר אחד שאת/ה מודה עליו שקרה לנו השבוע."
+            ],
+            fun: [
+                "עשה/י חיקוי שלי כשאני עצבני/ת או לחוץ/ה. אל תרחמ/י!",
+                "תן/י לי את הטלפון שלך ל-2 דקות, מותר לי להיכנס לכל מקום שאבחר.",
+                "מי משנינו ימות קודם בסרט אימה ולמה?",
+                "שים/י שיר שאנחנו אוהבים ותרקוד/י ריקוד מוגזם ומביך במיוחד רק בשבילי.",
+                "ספר/י לי על הפדיחה הכי גדולה שעשיתי ליד המשפחה שלך ועדיין לא דיברנו עליה.",
+                "תחרות מבטים: הראשון שמצמץ או צוחק חייב לעשות כלים/כביסה מחר.",
+                "תן/י לי מסאז' בכפות הרגליים במשך דקה תוך כדי שאת/ה מזמזם/ת את 'התקווה'.",
+                "מהו ההרגל שלי שהכי מגעיל אותך? תהיה/י כנה/ה!",
+                "אם היינו זוכים בלוטו, מה הדבר הראשון המטופש שהיית קונה?",
+                "תציג/י את הריב האחרון שלנו בהילוך מהיר וקול מצחיק.",
+                "צלמ/י סלפי שלנו עכשיו בפרצוף הכי מכוער שאנחנו יכולים לעשות.",
+                "מה הפריט לבוש שלי שאת/ה מת/ה שאני אזרוק לפח?",
+                "תמציא/י עכשיו שיר הלל קצר ליכולות הבישול שלי.",
+                "חובה עליך לדבר ב-5 הדקות הקרובות רק בלחישות דרמטיות.",
+                "מי הדמות המפורסמת שהיית עוזב/ת אותי בשבילה בלי לחשוב פעמיים?",
+                "תן/י לי לטעום משהו מהמקרר בעיניים עצומות – אני צריך/ה לנחש מה זה.",
+                "ספר/י בדיחה גסה. אם אני לא צוחק/ת – את/ה מוריד/ה פריט לבוש.",
+                "חובה עליך לתת לי 'פטור' ממטלה אחת מעצבנת בבית לשבוע הקרוב.",
+                "תנסה/י לפתות אותי בסגנון של פרסומת זולה בערוץ הקניות.",
+                "איזה שיר את/ה מתפדח/ת להודות שאת/ה אוהב/ת? שים/י אותו עכשיו.",
+                "תן/י לי כינוי חיבה חדש ומטופש שאני חייב/ת להסתובב איתו השבוע.",
+                "'Never Have I Ever': תגיד/י משהו שאף פעם לא עשית, אם אני עשיתי – אני שותה שוט.",
+                "תאר/י את יחסי המין שלנו באמצעות שם של סרט בלבד.",
+                "תעשה/י לי 'שק קמח' (או תנסה/י להרים אותי) לחדר השינה.",
+                "תן/י לי נשיקה במקום הכי מוזר בגוף שאת/ה יכול/ה לחשוב עליו (לא איבר מין)."
+            ],
+            romantic: [
+                "שים/י שיר סלואו, קום/י ותרקוד/י איתי צמוד למשך כל השיר. בלי דיבורים.",
+                "תן/י לי שלוש מחמאות על הגוף שלי שאת/ה באמת מתכוונ/ת אליהן.",
+                "נשק/י אותי נשיקה צרפתית ארוכה כמו בסרטים, לפחות 20 שניות.",
+                "תכנן/י לנו 'דייט הפתעה' לחודש הקרוב וספר/י לי רק מה ללבוש.",
+                "תחזיק/י לי את היד ותספר/י לי על רגע שבו ידעת שאני 'האחת/האחד'.",
+                "תעשה/י לי מסאז' בכתפיים או בראש למשך 5 דקות, בשקט גמור.",
+                "תכתוב/י לי עכשיו פתק אהבה ותחביא/י אותו בארנק/תיק שלי למחר בבוקר.",
+                "תשחזר/י את הנשיקה הראשונה שלנו (או הדייט הראשון) בפרטי פרטים.",
+                "תכין/י לי את המשקה שאני הכי אוהב/ת והגש לי אותו.",
+                "שב/י מולי, תסתכל/י לי בעיניים דקה שלמה בלי לדבר. רק חיבור.",
+                "מה הדבר הכי רומנטי שעשיתי בשבילך אי פעם?",
+                "תן/י לי נשיקה רכה על המצח ותגיד/י לי שאת/ה אוהב/ת אותי.",
+                "חלק/י איתי זיכרון מתוק מהירח דבש שלנו.",
+                "תבקש/י ממני משהו שאת/ה צריך/ה כרגע (חיבוק, מילה טובה, הקשבה) ואני אתן.",
+                "תאר/י לי איך נראה בוקר מושלם איתי במיטה ביום שבת.",
+                "קח/י את הטלפון שלי ותחליפ/י את הטפט לתמונה יפה של שנינו.",
+                "תלחש/י לי באוזן 3 סיבות שבגללן בחרת בי להיות אשתך/בעלך.",
+                "ליטופים: תעביר/י את קצות האצבעות על הזרוע שלי בעדינות למשך דקה.",
+                "תבטיח/י לי דבר אחד קטן שתעשה/י השבוע כדי לשמח אותי.",
+                "חיבוק דב: חבק/י אותי חזק ועוטף בלי לעזוב עד שאני משחרר/ת."
+            ],
+            hot: [
+                "קשור/י לי את העיניים. ב-3 דקות הבאות תעשה/י לי מה שבא לך, אסור לי לזוז.",
+                "תלחש/י לי באוזן את הפנטזיה הכי מלוכלכת שעברה לך בראש השבוע.",
+                "רד/י על הברכיים עכשיו... ותעשה/י מה שצריך לעשות.",
+                "בחר/י תחתונים שאני אלבש מחר לעבודה – ותדאג/י שאדע שזה מה שאת/ה חושב/ת עליו כל היום.",
+                "משחק תפקידים: אנחנו זרים בבר. נסה/י להתחיל איתי ולקחת אותי לשירותים.",
+                "תוריד/י לי פריט לבוש אחד בעזרת השיניים בלבד.",
+                "תאר/י לי בפירוט גרפי מה את/ה הולך/ת לעשות לי כשהמשחק יסתיים.",
+                "קח/י קוביית קרח ותעביר/י אותה על הגוף שלי, מהצוואר ומטה...",
+                "אני ה'בוס/ית' ל-10 דקות הקרובות. את/ה חייב/ת לציית לכל פקודה שלי.",
+                "תן/י לי להושיב אותך על הכיסא ולקשור לך את הידיים. עכשיו תורי לגרות אותך.",
+                "מהי התנוחה שעדיין לא ניסינו והיית רוצה לנסות? בוא/י ננסה עכשיו.",
+                "שלח/י יד למכנסיים/מתחת לחצאית שלי ותענג/י אותי ידנית, כאן ועכשיו.",
+                "צלמ/י תמונה אינטימית שלי (שתמחק אחר כך) בפוזה שמדליקה אותך.",
+                "'אמת או חובה' במיטה: שאל/י שאלה אינטימית, אם אני לא עונה – אני חייב/ת להוריד הכל.",
+                "תשתמש/י בצעצוע או אביזר שיש לנו (או באחד חדש) עלי.",
+                "תנשך/י אותי בעדינות בצוואר ובאוזן עד שתשמע/י אותי נאנח/ת.",
+                "תאר/י את הפעם הכי טובה ששכבנו אי פעם, ולמה זה היה כל כך טוב.",
+                "תעשה/י לי 'טיזינג' (גירוי בלי לגמור) למשך זמן שאת/ה קובע/ת.",
+                "סקס אוראלי הדדי (69). עכשיו.",
+                "תגיד/י לי בדיוק איך לגעת בעצמי מולך, ואני אבצע.",
+                "אנחנו מצלמים סרט כחול דמיוני. מה ה'טייטל' של הסצנה ומי אנחנו שם?",
+                "שכב/י על הגב. אני הולך/ת לעבור על כל הגוף שלך עם הלשון.",
+                "תן/י לי מכה קטנה (ספאנק) על הישבן בכל פעם שאני אומר/ת מילה 'אסורה' שתבחר/י.",
+                "קח/י אותי למקום בבית שאנחנו בדרך כלל לא עושים בו סקס, ונעשה את זה שם.",
+                "תוריד/י את הבגדים, הישאר/י רק עם נעליים/גרביים או פריט אחד מצחיק.",
+                "דמיינ/י שאסור לנו להרעיש כי יש אורחים בבית. סקס שקט ואיטי במיוחד.",
+                "תמרח/י עלי שמן עיסוי או קרם גוף בצורה הכי אירוטית שאפשר.",
+                "תנשק/י את הירכיים הפנימיות שלי, לאט לאט, עד שתגיע/י למעלה.",
+                "תבחר/י 'מילת ביטחון' להערב, כי אנחנו הולכים להיות פרועים מהרגיל.",
+                "ג'וקר: תבקש/י כל דבר מיני שעולה על דעתך – ואני חייב/ת להסכים (בגבולות ההגיון)."
+            ],
+            mixed: [] 
+        };
+        
+        // יצירת מערך ה-MIXED על ידי שילוב כל הקלפים
+        decks.mixed = [].concat(decks.deep, decks.fun, decks.romantic, decks.hot);
+
+
+        let currentCategory = '';
+
+        function startGame(category) {
+            currentCategory = category;
+            
+            const menuScreen = document.getElementById('menu-screen');
+            const cardScreen = document.getElementById('card-screen');
+            const cardWrapper = document.getElementById('current-card-wrapper');
+            const cardCategoryTitle = document.getElementById('card-category-title');
+            
+            // הסתרת תפריט באנימציה
+            menuScreen.classList.add('hidden');
+            
+            // הופעת מסך הקלף
+            cardScreen.classList.add('visible');
+            cardWrapper.classList.remove('dark-text-mode');
+            
+            let colorVar;
+            let titleText;
+
+            // הגדרת הרקע והכותרת ההתחלתיים (רק אם זו לא קטגוריה מעורבבת)
+            if (category === 'deep') {
+                colorVar = 'var(--deep)';
+                titleText = 'עמוק 🌊';
+            } else if (category === 'fun') {
+                colorVar = 'var(--fun)';
+                titleText = 'כיף / שטות 🤪';
+                cardWrapper.classList.add('dark-text-mode');
+            } else if (category === 'romantic') {
+                colorVar = 'var(--romantic)';
+                titleText = 'רומנטי ❤️';
+            } else if (category === 'hot') {
+                colorVar = 'var(--hot)';
+                titleText = 'חם 🔥';
+            } else if (category === 'mixed') {
+                colorVar = 'var(--mixed)';
+                titleText = 'מעורבב / הפתעה 💫';
+            }
+            
+            cardWrapper.style.backgroundImage = colorVar;
+            cardCategoryTitle.innerText = titleText;
+            
+            // טעינת הקלף הראשון
+            nextCard();
+            
+            // תיקון אנימציית כניסה: מוודא שהמסך נראה מיד
+            cardScreen.style.opacity = 1; 
+            cardScreen.style.transform = 'translateY(0)';
+        }
+
+        // פונקציה לשליפת קלף
+        function nextCard() {
+            const deck = decks[currentCategory];
+            const cardWrapper = document.getElementById('current-card-wrapper');
+            const cardCategoryTitle = document.getElementById('card-category-title');
+            const cardContent = document.getElementById('card-content');
+            const cardScreen = document.getElementById('card-screen');
+            
+            // אנימציית יציאת טקסט קודם
+            cardContent.style.opacity = 0;
+            cardContent.style.transform = 'translateY(10px)';
+
+            setTimeout(() => {
+                let randomCard = deck[Math.floor(Math.random() * deck.length)];
+                let actualCategory = currentCategory; 
+                let colorVar = '';
+                let titleText = '';
+
+                cardWrapper.classList.remove('dark-text-mode'); // איפוס לפני בחירה
+
+                // אם זו קטגוריית מעורבב, עלינו לבחור צבע וכותרת מתאימים
+                if (currentCategory === 'mixed') {
+                    if (decks.hot.includes(randomCard)) { actualCategory = 'hot'; colorVar = 'var(--hot)'; titleText = 'חם 🔥'; }
+                    else if (decks.deep.includes(randomCard)) { actualCategory = 'deep'; colorVar = 'var(--deep)'; titleText = 'עמוק 🌊'; }
+                    else if (decks.fun.includes(randomCard)) { actualCategory = 'fun'; colorVar = 'var(--fun)'; titleText = 'כיף / שטות 🤪'; }
+                    else if (decks.romantic.includes(randomCard)) { actualCategory = 'romantic'; colorVar = 'var(--romantic)'; titleText = 'רומנטי ❤️'; }
+
+                    if (actualCategory === 'fun') {
+                        cardWrapper.classList.add('dark-text-mode');
+                    } else {
+                         cardWrapper.classList.remove('dark-text-mode');
+                    }
+                    
+                    cardWrapper.style.backgroundImage = colorVar;
+                    cardCategoryTitle.innerText = titleText;
+
+                } else {
+                    // אם לא מעורבב, משתמשים בערכים ההתחלתיים (שכבר הוגדרו ב-startGame)
+                     if (currentCategory === 'fun') {
+                        cardWrapper.classList.add('dark-text-mode');
+                    }
+                }
+
+                // עדכון תוכן הקלף
+                cardContent.innerText = randomCard;
+                
+                // אנימציית כניסת טקסט חדש
+                cardContent.style.opacity = 1;
+                cardContent.style.transform = 'translateY(0)';
+            }, 300); // מחכה לאנימציה הקודמת
+        }
+
+        function showMenu() {
+            const menuScreen = document.getElementById('menu-screen');
+            const cardScreen = document.getElementById('card-screen');
+            
+            // הסתרת מסך הקלף
+            cardScreen.classList.remove('visible');
+            
+            // הופעת תפריט באנימציה
+            menuScreen.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
